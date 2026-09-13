@@ -53,19 +53,6 @@
   </div>
 </section>
 
-<section style="padding-top: 3rem;">
-  <div class="container" style="text-align:center;">
-    <h2>Wo wir auftreten</h2>
-    <p class="lead" style="margin: 0 auto 1.8rem;">Wir sind im Umkreis von ca. 100&nbsp;km rund um Sankt Augustin für eure Veranstaltung unterwegs.</p>
-    <div class="map-wrap">
-      <iframe class="map-embed" src="https://www.google.com/maps?q=Sankt+Augustin,Germany&z=7&output=embed" loading="lazy" title="Karte: Einsatzgebiet rund um Sankt Augustin" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div class="map-radius" aria-hidden="true"></div>
-      <div class="map-pin">📍 Sankt Augustin</div>
-    </div>
-    <p style="font-size:0.85rem; color:#777; margin-top:0.8rem;">Der eingezeichnete Kreis ist eine ungefähre Orientierung, keine exakte Grenze – auch weitere Fahrten sind nach Absprache möglich.</p>
-  </div>
-</section>
-
 <section id="ueber-uns">
   <div class="container grid-2">
     <div>
@@ -111,6 +98,77 @@
     <div class="actions" style="justify-content:center;">
       <a class="btn btn-primary" href="kontakt.html">Zur Kontaktseite</a>
       <a class="btn btn-red" href="galerie.html">Zur Fotogalerie</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-teal">
+  <div class="container">
+    <div class="grid-2">
+      <div>
+        <h2>Unser Einsatzgebiet</h2>
+        <p>Unser Zuhause ist Sankt Augustin – gespielt wird im gesamten Rheinland und drumherum. Im Umkreis von rund <strong>100 Kilometern</strong> sind wir regelmäßig unterwegs.</p>
+        <p>Ob Köln, Bonn, Düsseldorf, Koblenz oder das Bergische Land: Wenn ihr in dieser Region feiert, sind wir gern dabei. Für weitere Strecken finden wir sicher auch eine Lösung – fragt einfach an.</p>
+        <div class="chips">
+          <span class="chip">📍 Köln</span>
+          <span class="chip">📍 Bonn</span>
+          <span class="chip">📍 Düsseldorf</span>
+          <span class="chip">📍 Koblenz</span>
+        </div>
+      </div>
+
+      <div class="radius-map">
+        <svg viewBox="0 0 500 500" role="img" aria-label="Karte: Einsatzgebiet im Umkreis von 100 Kilometern um Sankt Augustin">
+          <defs>
+            <radialGradient id="rmFill" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#F2B705" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="#F2B705" stop-opacity="0.08"/>
+            </radialGradient>
+          </defs>
+
+          <rect x="0" y="0" width="500" height="500" fill="#12172B" rx="16"/>
+
+          <g stroke="#ffffff" stroke-opacity="0.07" stroke-width="1">
+            <path d="M0 125 H500 M0 250 H500 M0 375 H500 M125 0 V500 M250 0 V500 M375 0 V500"/>
+          </g>
+
+          <circle cx="250" cy="250" r="90" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1" stroke-dasharray="4 6"/>
+          <circle cx="250" cy="250" r="180" fill="url(#rmFill)" stroke="#F2B705" stroke-width="3" stroke-dasharray="10 7"/>
+
+          <g font-family="'Work Sans', sans-serif" font-size="13" fill="#E8E6E0">
+            <circle cx="220.9" cy="216.4" r="4" fill="#1FADA0"/>
+            <text x="230" y="212">Köln</text>
+
+            <circle cx="238.4" cy="256.5" r="4" fill="#1FADA0"/>
+            <text x="200" y="278">Bonn</text>
+
+            <circle cx="197.2" cy="158.3" r="4" fill="#1FADA0"/>
+            <text x="120" y="154">Düsseldorf</text>
+
+            <circle cx="245" cy="152.6" r="4" fill="#1FADA0"/>
+            <text x="254" y="148">Wuppertal</text>
+
+            <circle cx="300.6" cy="332.8" r="4" fill="#1FADA0"/>
+            <text x="310" y="337">Koblenz</text>
+
+            <circle cx="355.7" cy="229" r="4" fill="#1FADA0"/>
+            <text x="364" y="226">Siegen</text>
+
+            <circle cx="109.8" cy="248.9" r="4" fill="#1FADA0"/>
+            <text x="30" y="245">Aachen</text>
+
+            <circle cx="284.9" cy="101" r="4" fill="#1FADA0"/>
+            <text x="294" y="98">Dortmund</text>
+          </g>
+
+          <g>
+            <circle cx="250" cy="250" r="11" fill="#E4572E" stroke="#fff" stroke-width="3"/>
+            <text x="250" y="232" text-anchor="middle" font-family="'Barlow Condensed', sans-serif" font-weight="700" font-size="19" fill="#fff">Sankt Augustin</text>
+          </g>
+
+          <text x="250" y="452" text-anchor="middle" font-family="'Barlow Condensed', sans-serif" font-weight="700" font-size="20" fill="#F2B705">ca. 100 km Umkreis</text>
+        </svg>
+      </div>
     </div>
   </div>
 </section>
