@@ -376,54 +376,17 @@ nav.main-nav a[aria-current="page"] {
 
 /* ---------- Einsatzgebiet-Karte ---------- */
 
-.map-wrap {
-  position: relative;
-  max-width: 700px;
-  margin: 0 auto;
-  aspect-ratio: 4 / 3;
+.radius-map {
   border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 14px 34px rgba(0,0,0,0.18);
+  box-shadow: 0 16px 38px rgba(18,23,43,0.28);
+  line-height: 0;
 }
 
-.map-embed {
+.radius-map svg {
   width: 100%;
-  height: 100%;
-  border: 0;
+  height: auto;
   display: block;
-}
-
-.map-radius {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 260px;
-  height: 260px;
-  margin: -130px 0 0 -130px;
-  border-radius: 50%;
-  border: 3px dashed var(--gold);
-  background: rgba(242, 183, 5, 0.14);
-  pointer-events: none;
-}
-
-.map-pin {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -100%);
-  background: var(--navy);
-  color: #fff;
-  padding: 0.3rem 0.75rem;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-}
-
-@media (max-width: 480px) {
-  .map-radius { width: 200px; height: 200px; margin: -100px 0 0 -100px; }
 }
 
 /* ---------- Sections ---------- */
