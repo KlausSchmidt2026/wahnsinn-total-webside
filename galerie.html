@@ -59,6 +59,25 @@
   <div class="lightbox-counter" id="lightbox-counter"></div>
 </div>
 
+<section class="section-teal">
+  <div class="container">
+    <h2>Videos</h2>
+    <p class="lead" style="margin-top:-0.4rem;">Ein paar bewegte Eindrücke von unseren Auftritten.</p>
+
+    <div class="video-player-wrap">
+      <video id="main-video" controls playsinline></video>
+    </div>
+
+    <div class="video-nav">
+      <button type="button" id="video-prev" class="btn btn-outline video-nav-btn">&#10094; Vorheriges</button>
+      <span id="video-counter" class="video-counter"></span>
+      <button type="button" id="video-next" class="btn btn-outline video-nav-btn">Nächstes &#10095;</button>
+    </div>
+
+    <div class="video-list" id="video-list"></div>
+  </div>
+</section>
+
 <section class="section-alt">
   <div class="container" style="text-align:center;">
     <h2>Auch bei eurem Fest dabei sein?</h2>
@@ -214,6 +233,66 @@
       if (diff < 0) showNext(); else showPrev();
     }
   });
+</script>
+
+<script>
+  // ================================================
+  // VIDEOS
+  // Neues Video hinzufügen: zuerst die Videodatei per Upload
+  // nach assets/videos/ legen, dann hier unten eine neue
+  // Zeile ergänzen, z. B.:
+  // { src: 'assets/videos/mein-neues-video.mp4', title: 'Kurzer Titel' },
+  // Reihenfolge in der Liste = Reihenfolge im Player.
+  // ================================================
+  const videos = [
+    { src: 'assets/videos/video-1.mp4', title: 'Video 1' },
+    { src: 'assets/videos/video-2.mp4', title: 'Video 2' },
+    { src: 'assets/videos/video-3.mp4', title: 'Video 3' },
+    { src: 'assets/videos/video-4.mp4', title: 'Video 4' },
+    { src: 'assets/videos/video-5.mp4', title: 'Video 5' }
+  ];
+
+  const player = document.getElementById('main-video');
+  const videoList = document.getElementById('video-list');
+  const videoCounter = document.getElementById('video-counter');
+  const videoPrevBtn = document.getElementById('video-prev');
+  const videoNextBtn = document.getElementById('video-next');
+  let currentVideo = 0;
+
+  videos.forEach((v, i) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'video-list-item';
+    item.textContent = v.title;
+    item.dataset.index = i;
+    item.addEventListener('click', () => loadVideo(i, true));
+    videoList.appendChild(item);
+  });
+
+  function loadVideo(index, autoplay) {
+    currentVideo = index;
+    const v = videos[currentVideo];
+    player.src = v.src;
+    if (autoplay) player.play().catch(() => {});
+    videoCounter.textContent = (currentVideo + 1) + ' / ' + videos.length;
+    document.querySelectorAll('.video-list-item').forEach((el, i) => {
+      el.classList.toggle('active', i === currentVideo);
+    });
+    videoPrevBtn.disabled = currentVideo === 0;
+    videoNextBtn.disabled = currentVideo === videos.length - 1;
+  }
+
+  videoPrevBtn.addEventListener('click', () => {
+    if (currentVideo > 0) loadVideo(currentVideo - 1, true);
+  });
+  videoNextBtn.addEventListener('click', () => {
+    if (currentVideo < videos.length - 1) loadVideo(currentVideo + 1, true);
+  });
+  player.addEventListener('ended', () => {
+    if (currentVideo < videos.length - 1) loadVideo(currentVideo + 1, true);
+  });
+
+  if (videos.length) loadVideo(0, false);
 </script>
 </body>
 </html>
