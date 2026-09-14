@@ -15,12 +15,35 @@
   --line: rgba(255,255,255,0.14);
   --line-dark: rgba(0,0,0,0.08);
   --radius: 14px;
+  --radius-lg: 20px;
   --max: 1040px;
+
+  /* Abgestufte Schatten statt Einzelwerte quer durch die Datei */
+  --shadow-sm: 0 2px 6px rgba(18,23,43,0.06);
+  --shadow-md: 0 6px 18px rgba(18,23,43,0.10);
+  --shadow-lg: 0 16px 38px rgba(18,23,43,0.16);
+  --shadow-xl: 0 26px 60px rgba(18,23,43,0.24);
+
+  /* Markenfarben der Kontaktkanaele, nur fuer den Hover */
+  --c-whatsapp: #25D366;
+  --c-instagram: #C13584;
+  --c-facebook: #1877F2;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* verhindert, dass Ankerziele unter dem klebenden Header landen */
+  scroll-padding-top: 80px;
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--navy);
+}
 
 body {
   margin: 0;
@@ -34,13 +57,17 @@ body {
 h1, h2, h3, .brand {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
-  letter-spacing: 0.01em;
-  line-height: 1.05;
-  margin: 0 0 0.4em;
+  letter-spacing: 0.005em;
+  line-height: 1.08;
+  margin: 0 0 0.5em;
+  text-wrap: balance;
 }
 
-h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
+h1 { font-size: clamp(2.1rem, 5.5vw, 3.1rem); }
+h2 { font-size: clamp(1.75rem, 4vw, 2.45rem); }
 h3 { font-size: 1.3rem; }
+
+p { text-wrap: pretty; }
 
 p { max-width: 65ch; }
 
@@ -63,6 +90,12 @@ img { max-width: 100%; display: block; border-radius: var(--radius); }
   top: 0;
   z-index: 20;
   border-bottom: 3px solid var(--gold);
+  transition: box-shadow 0.25s ease;
+}
+
+/* Klasse wird in script.js gesetzt, sobald die Seite gescrollt ist */
+.site-header.scrolled {
+  box-shadow: 0 6px 24px rgba(0,0,0,0.45);
 }
 
 .header-inner {
@@ -97,8 +130,21 @@ img { max-width: 100%; display: block; border-radius: var(--radius); }
   color: #fff;
   flex-shrink: 0;
   text-decoration: none;
+  transition: transform 0.18s var(--ease), background-color 0.18s ease;
 }
-.icon-btn:hover { background: #ef6b45; }
+
+.icon-btn:hover {
+  background: #ef6b45;
+  transform: translateY(-2px) scale(1.06);
+}
+
+.icon-btn:active { transform: translateY(0) scale(0.98); }
+
+/* Beim Hover nimmt jedes Symbol die Farbe seines Kanals an –
+   im Ruhezustand bleibt die Leiste einheitlich rot. */
+#whatsapp-header-link:hover { background: var(--c-whatsapp); color: #0a3d24; }
+.header-left a[aria-label*="Instagram"]:hover { background: var(--c-instagram); }
+.header-left a[aria-label*="Facebook"]:hover  { background: var(--c-facebook); }
 
 .brand {
   flex: 1 1 auto;
@@ -114,8 +160,6 @@ img { max-width: 100%; display: block; border-radius: var(--radius); }
   display: block;
 }
 
-.brand span { }
-
 nav.main-nav ul {
   list-style: none;
   display: flex;
@@ -125,15 +169,28 @@ nav.main-nav ul {
 }
 
 nav.main-nav a {
+  position: relative;
   text-decoration: none;
   font-weight: 600;
   padding: 0.3rem 0;
-  border-bottom: 2px solid transparent;
 }
 
-nav.main-nav a:hover,
-nav.main-nav a[aria-current="page"] {
-  border-bottom-color: var(--gold);
+/* Der Unterstrich waechst aus der Mitte, statt hart umzuspringen */
+nav.main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transition: transform 0.22s var(--ease);
+}
+
+nav.main-nav a:hover::after,
+nav.main-nav a[aria-current="page"]::after {
+  transform: scaleX(1);
 }
 
 .nav-toggle {
@@ -298,8 +355,6 @@ nav.main-nav a[aria-current="page"] {
   .logo-frame { padding: 1.1rem 0.6rem; }
 }
 
-.logo-frame .logo3d { justify-content: center; }
-
 .hero-logo-img {
   display: block;
   width: 420px;
@@ -339,8 +394,9 @@ nav.main-nav a[aria-current="page"] {
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.4rem;
+  padding: 0.78rem 1.5rem;
   border-radius: 999px;
   font-weight: 600;
   text-decoration: none;
@@ -348,20 +404,59 @@ nav.main-nav a[aria-current="page"] {
   cursor: pointer;
   font-size: 1rem;
   font-family: inherit;
+  line-height: 1.2;
+  transition: transform 0.18s var(--ease),
+              box-shadow 0.18s ease,
+              background-color 0.18s ease,
+              border-color 0.18s ease;
 }
+
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
 
 .btn-primary {
   background: var(--gold);
   color: var(--navy);
+  box-shadow: 0 4px 14px rgba(242,183,5,0.32);
 }
-.btn-primary:hover { background: #f0b155; }
+.btn-primary:hover {
+  background: #ffc61f;
+  box-shadow: 0 8px 22px rgba(242,183,5,0.42);
+}
 
 .btn-outline {
   border-color: rgba(245,243,238,0.5);
   color: var(--cream);
   background: transparent;
 }
-.btn-outline:hover { border-color: var(--cream); }
+.btn-outline:hover {
+  border-color: var(--cream);
+  background: rgba(255,255,255,0.08);
+}
+
+/* Auf hellem Grund braucht der Umriss-Button dunkle Kontraste */
+.section-alt .btn-outline,
+.section-teal .btn-outline,
+section:not([class]) .btn-outline {
+  border-color: rgba(18,23,43,0.35);
+  color: var(--navy);
+}
+.section-alt .btn-outline:hover,
+.section-teal .btn-outline:hover,
+section:not([class]) .btn-outline:hover {
+  border-color: var(--navy);
+  background: rgba(18,23,43,0.06);
+}
+
+/* ... ausser in der dunklen Kontaktkarte */
+.contact-card .btn-outline {
+  border-color: rgba(245,243,238,0.5);
+  color: var(--cream);
+}
+.contact-card .btn-outline:hover {
+  border-color: var(--cream);
+  background: rgba(255,255,255,0.08);
+}
 
 .btn-whatsapp {
   background: #25D366;
@@ -370,16 +465,18 @@ nav.main-nav a[aria-current="page"] {
 .btn-whatsapp:hover { background: #33e075; }
 
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* ---------- Einsatzgebiet-Karte ---------- */
 
 .radius-map {
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 16px 38px rgba(18,23,43,0.28);
+  box-shadow: var(--shadow-xl);
   line-height: 0;
 }
 
@@ -391,22 +488,36 @@ nav.main-nav a[aria-current="page"] {
 
 /* ---------- Sections ---------- */
 
-section { padding: 3.5rem 0; }
-section + section { border-top: 1px solid var(--line-dark); }
+section { padding: 4rem 0; }
+
+/* Frueher lag zwischen JEDEN zwei Abschnitten eine graue Linie – auch
+   dort, wo ohnehin die Hintergrundfarbe wechselt. Die Linie erscheint
+   jetzt nur noch zwischen zwei gleich hellen Abschnitten. */
+section:not([class]) + section:not([class]) {
+  border-top: 1px solid var(--line-dark);
+}
+
+@media (max-width: 640px) {
+  section { padding: 2.8rem 0; }
+}
 
 .section-alt {
-  background: #FFF1DB;
+  background: linear-gradient(180deg, #FFF3E1 0%, #FFEDCF 100%);
 }
 
 .section-teal {
-  background: #E4F7F4;
+  background: linear-gradient(180deg, #E9F9F6 0%, #DCF3EF 100%);
 }
 
 .btn-red {
   background: var(--red);
   color: #fff;
+  box-shadow: 0 4px 14px rgba(228,87,46,0.32);
 }
-.btn-red:hover { background: #ef6b45; }
+.btn-red:hover {
+  background: #ef6b45;
+  box-shadow: 0 8px 22px rgba(228,87,46,0.42);
+}
 
 .chips {
   display: flex;
@@ -425,6 +536,13 @@ section + section { border-top: 1px solid var(--line-dark); }
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s var(--ease), box-shadow 0.18s ease;
+}
+
+.chip:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 .chip:nth-child(4n+1) { border-color: var(--gold); }
 .chip:nth-child(4n+2) { border-color: var(--red); }
@@ -456,6 +574,15 @@ section + section { border-top: 1px solid var(--line-dark); }
   object-fit: cover;
   border-radius: var(--radius);
   background: var(--navy);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.22s var(--ease), box-shadow 0.22s ease;
+}
+
+.photo-strip .ph:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  z-index: 2;
 }
 
 /* ---------- Galerie ---------- */
@@ -480,6 +607,14 @@ section + section { border-top: 1px solid var(--line-dark); }
   overflow: hidden;
   aspect-ratio: 4/3;
   outline-offset: 3px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.22s var(--ease), box-shadow 0.22s ease;
+}
+
+.gallery-grid a:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  z-index: 2;
 }
 
 .gallery-grid img {
@@ -487,7 +622,7 @@ section + section { border-top: 1px solid var(--line-dark); }
   height: 100%;
   object-fit: cover;
   border-radius: var(--radius);
-  transition: transform 0.2s ease;
+  transition: transform 0.35s var(--ease);
 }
 
 .gallery-grid a:hover img { transform: scale(1.04); }
@@ -497,8 +632,9 @@ section + section { border-top: 1px solid var(--line-dark); }
 .video-player-wrap {
   margin-top: 1.5rem;
   background: #000;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-xl);
 }
 
 .video-player-wrap video {
@@ -550,14 +686,23 @@ section + section { border-top: 1px solid var(--line-dark); }
   background: #fff;
   color: var(--ink);
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s var(--ease), border-color 0.18s ease,
+              background-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.video-list-item:hover { border-color: var(--teal); }
+.video-list-item:hover {
+  border-color: var(--teal);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
 
 .video-list-item.active {
   background: var(--navy);
   border-color: var(--navy);
   color: #fff;
+  transform: none;
+  box-shadow: var(--shadow-md);
 }
 
 /* ---------- Lightbox / Diashow ---------- */
@@ -566,13 +711,25 @@ section + section { border-top: 1px solid var(--line-dark); }
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.92);
+  background: rgba(8,10,18,0.94);
+  backdrop-filter: blur(6px);
   z-index: 100;
   align-items: center;
   justify-content: center;
 }
 
-.lightbox.open { display: flex; }
+.lightbox.open {
+  display: flex;
+  animation: lb-fade 0.2s ease;
+}
+
+.lightbox.open img { animation: lb-zoom 0.28s var(--ease); }
+
+@keyframes lb-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lb-zoom {
+  from { opacity: 0; transform: scale(0.965); }
+  to   { opacity: 1; transform: scale(1); }
+}
 
 .lightbox img {
   max-width: 90vw;
@@ -636,60 +793,23 @@ section + section { border-top: 1px solid var(--line-dark); }
   .lightbox-close { top: 0.8rem; right: 0.8rem; }
 }
 
-/* ---------- 3D-Logo-Schriftzug (modern, Baloo 2) ---------- */
-
-.logo3d {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 800;
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: center;
-  line-height: 1.05;
-}
-
-/* Buchstaben eines Wortes bleiben als Einheit zusammen -
-   bricht bei Platzmangel nur zwischen den Wörtern um, nie mitten im Wort */
-.logo3d .lg-word {
-  display: inline-flex;
-  flex-wrap: nowrap;
-}
-
-.logo3d span:not(.lg-word):not(.lg-space) {
-  display: inline-block;
-  color: hsl(var(--h) 82% 58%);
-  text-shadow:
-    1px 1px 0 hsl(var(--h) 80% 34%),
-    2px 2px 0 hsl(var(--h) 80% 34%),
-    3px 3px 0 hsl(var(--h) 78% 30%),
-    4px 4px 0 hsl(var(--h) 78% 27%),
-    5px 5px 0 hsl(var(--h) 76% 23%),
-    6px 8px 12px rgba(0,0,0,0.35);
-}
-
-.logo3d span:not(.lg-word):not(.lg-space):nth-child(odd) { transform: rotate(-3deg); }
-.logo3d span:not(.lg-word):not(.lg-space):nth-child(even) { transform: rotate(3deg); }
-
-.logo3d .lg-space { width: 0.32em; }
-
-.logo3d.lg-hero { font-size: clamp(1.7rem, 7.5vw, 4.4rem); }
-
-@media (max-width: 380px) {
-  .logo3d.lg-hero { font-size: 1.5rem; }
-}
-.logo3d.lg-nav   { font-size: 1.5rem; }
-.logo3d.lg-nav span {
-  text-shadow:
-    1px 1px 0 hsl(var(--h) 80% 34%),
-    2px 2px 0 hsl(var(--h) 78% 30%),
-    3px 3px 5px rgba(0,0,0,0.3);
-}
-
 .contact-card {
-  background: var(--navy);
+  background: linear-gradient(155deg, var(--navy-soft) 0%, var(--navy) 62%);
   color: var(--cream);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+/* schmale Goldkante als Akzent am oberen Rand */
+.contact-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--gold), var(--red), var(--teal));
 }
 
 .contact-card h3 { color: var(--cream); }
@@ -746,20 +866,26 @@ form.stacked label {
 form.stacked input,
 form.stacked textarea {
   width: 100%;
-  padding: 0.7rem 0.8rem;
-  border: 1px solid #cfc9ba;
-  border-radius: 6px;
+  padding: 0.8rem 0.95rem;
+  border: 2px solid #e0dacb;
+  border-radius: 10px;
   font-family: inherit;
   font-size: 1rem;
   background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
+
+form.stacked input:hover,
+form.stacked textarea:hover { border-color: #c8c0ad; }
 
 form.stacked textarea { resize: vertical; min-height: 120px; }
 
 form.stacked input:focus,
 form.stacked textarea:focus {
-  outline: 3px solid var(--teal);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 4px rgba(31,173,160,0.20);
 }
 
 /* ---------- Footer ---------- */
@@ -767,8 +893,9 @@ form.stacked textarea:focus {
 footer.site-footer {
   background: var(--navy);
   color: rgba(245,243,238,0.75);
-  padding: 2.2rem 0;
+  padding: 2.4rem 0;
   font-size: 0.9rem;
+  border-top: 3px solid var(--gold);
 }
 
 footer.site-footer .container {
@@ -779,8 +906,15 @@ footer.site-footer .container {
   align-items: center;
 }
 
-footer.site-footer a { text-decoration: none; }
-footer.site-footer a:hover { text-decoration: underline; }
+footer.site-footer a {
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+footer.site-footer a:hover {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 footer.site-footer ul {
   list-style: none;
@@ -791,16 +925,27 @@ footer.site-footer ul {
   flex-wrap: wrap;
 }
 
-/* ---------- Legal pages ---------- */
+/* ---------- Rechtstexte ---------- */
 
-.legal h2 { margin-top: 2rem; }
-.legal .todo {
-  background: #fff4d6;
-  border: 1px dashed var(--gold);
-  padding: 0.9rem 1rem;
-  border-radius: 8px;
-  font-size: 0.92rem;
-  margin: 0.6rem 0 1.4rem;
+.legal h1 { margin-bottom: 0.6rem; }
+.legal h2 {
+  margin-top: 2.4rem;
+  font-size: 1.35rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid var(--line-dark);
+}
+.legal p, .legal ul { max-width: 68ch; }
+.legal ul { padding-left: 1.2rem; }
+.legal li { margin-bottom: 0.35rem; }
+.legal a { color: #0f6b62; }
+
+.legal-intro {
+  font-size: 1.05rem;
+  background: #FFF1DB;
+  border-left: 4px solid var(--gold);
+  padding: 1rem 1.2rem;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 2rem;
 }
 
 /* ---------- Focus visibility ---------- */
@@ -818,8 +963,386 @@ footer.site-footer ul {
 :focus-visible {
   outline: 3px solid var(--teal);
   outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Tuerkis verschwindet auf den dunklen Flaechen fast – dort Gold */
+.site-header :focus-visible,
+.contact-card :focus-visible,
+.hero :focus-visible,
+.lightbox :focus-visible,
+footer.site-footer :focus-visible {
+  outline-color: var(--gold);
 }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+}
+
+/* ============================================================
+   Ergaenzungen – Klassen anstelle der frueheren Inline-Styles
+   ============================================================ */
+
+/* ---------- Sprunglink fuer Tastatur und Screenreader ---------- */
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  background: var(--gold);
+  color: var(--navy);
+  padding: 0.7rem 1.2rem;
+  font-weight: 700;
+  border-radius: 0 0 8px 0;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/* ---------- Hero-Bausteine ---------- */
+
+/* Zitat rutscht ueber die Bildkante – frueher inline als margin-top: -9rem */
+.hero-quote--lift { margin-top: -9rem; }
+
+@media (max-width: 720px) {
+  .hero-quote--lift { margin-top: -4.5rem; }
+}
+@media (max-width: 480px) {
+  .hero-quote--lift { margin-top: -2.5rem; }
+}
+
+.hero-claim {
+  margin: 0.5rem 0 0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.hero-lead {
+  text-align: center;
+  margin: 1.2rem auto 0;
+  color: rgba(245,243,238,0.9);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* Handschriftliche Ueberschrift auf Galerie und Shop */
+.hero-headline {
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 3px 12px rgba(0,0,0,0.55);
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 8vw, 4.2rem);
+  transform: rotate(-2deg);
+  margin-bottom: 0;
+  max-width: none;
+}
+
+.hero-headline em {
+  font-style: normal;
+  color: var(--gold);
+}
+
+.hero-headline--lift { margin-top: -7rem; }
+
+@media (max-width: 720px) {
+  .hero-headline--lift { margin-top: -3.5rem; }
+}
+@media (max-width: 480px) {
+  .hero-headline--lift { margin-top: -2rem; }
+}
+
+.hero-bg-img--lower { object-position: 50% 38%; }
+
+.hero--compact { padding: 3rem 0 3.5rem; }
+
+/* ---------- Layout-Helfer ---------- */
+
+.container--center { text-align: center; }
+.container--narrow { max-width: 720px; }
+
+.actions--center { justify-content: center; }
+
+.section--tight { padding-top: 1rem; }
+
+.measure { max-width: 55ch; }
+
+.measure-center {
+  max-width: 52ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container--center .actions { justify-content: center; }
+.container--center .btn { margin-top: 0.4rem; }
+
+.lead--tight { margin-top: -0.4rem; }
+
+.hinweis {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.photo-strip--duo { grid-template-columns: 1fr 1fr; }
+
+/* ---------- Shop ---------- */
+
+.contact-card--roomy { padding: 2.5rem 2rem; }
+
+.shop-logo {
+  width: min(320px, 80%);
+  height: auto;
+  margin: 0 auto 1.4rem;
+  display: block;
+}
+
+.shop-text {
+  color: rgba(245,243,238,0.9);
+  max-width: 45ch;
+  margin: 0 auto 1.6rem;
+}
+
+.shop-note {
+  color: rgba(245,243,238,0.6);
+  font-size: 0.85rem;
+  max-width: 45ch;
+  margin: 1.6rem auto 0;
+}
+
+/* ---------- Kontaktkarte ---------- */
+
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--cream);
+  margin: 0 0 0.6rem;
+}
+
+.card-text { color: rgba(245,243,238,0.85); }
+
+.card-note {
+  color: rgba(245,243,238,0.6);
+  font-size: 0.88rem;
+  margin-top: 0.6rem;
+}
+
+.contact-card a { color: var(--gold); }
+
+.btn-small {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+.whatsapp-gate h3 { font-size: 1.1rem; }
+.whatsapp-gate .card-text { font-size: 0.95rem; }
+.whatsapp-link-wrap:not(:empty) { margin-top: 0.8rem; }
+
+/* ---------- Formular ---------- */
+
+.form-hinweis {
+  font-size: 0.85rem;
+  color: #5a5548;
+  margin: 0;
+}
+
+.danke-hinweis {
+  margin-top: 1rem;
+  font-weight: 600;
+  background: #E4F7F4;
+  border-left: 4px solid var(--teal);
+  padding: 0.8rem 1rem;
+  border-radius: 0 8px 8px 0;
+}
+
+/* ---------- Kleinigkeiten ---------- */
+
+main > section:first-child { border-top: none; }
+
+.video-list-item[aria-pressed="true"] { cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-grid img { transition: none; }
+}
+
+/* ============================================================
+   Grafischer Feinschliff – Bewegung, Details, Druckansicht
+   ============================================================ */
+
+/* ---------- Sanftes Einblenden beim Scrollen ----------
+   script.js vergibt .reveal an die Abschnitte und setzt
+   .is-visible, sobald sie ins Bild kommen. Ohne JavaScript
+   bleibt alles sichtbar – die Seite funktioniert auch dann. */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Hero: Zitat und Logo leicht gestaffelt ---------- */
+
+.hero-quote {
+  animation: hero-auf 0.8s var(--ease) both;
+}
+
+.logo-frame {
+  animation: hero-auf 0.8s 0.12s var(--ease) both;
+}
+
+.hero-content .lead {
+  animation: hero-auf 0.8s 0.22s var(--ease) both;
+}
+
+.hero-content .actions {
+  animation: hero-auf 0.8s 0.32s var(--ease) both;
+}
+
+@keyframes hero-auf {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Die Verschiebung des Zitats darf die Animation nicht aufheben */
+.hero-quote--lift { animation-name: hero-auf-lift; }
+
+@keyframes hero-auf-lift {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Ueberschriften mit dezentem Akzent ---------- */
+
+.grid-2 > div > h2:first-child,
+.container--center > h2:first-child {
+  position: relative;
+  padding-top: 0.85rem;
+}
+
+.grid-2 > div > h2:first-child::before,
+.container--center > h2:first-child::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 52px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold), var(--red));
+}
+
+.container--center > h2:first-child::before {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ---------- Fotostreifen: erstes Bild etwas groesser ---------- */
+
+@media (min-width: 721px) {
+  .photo-strip:not(.photo-strip--duo) .ph:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+    /* Hoehe ergibt sich aus den zwei Rasterzeilen, nicht aus
+       einem festen Seitenverhaeltnis */
+    aspect-ratio: auto;
+  }
+}
+
+/* ---------- Rand des Inhalts auf grossen Schirmen ---------- */
+
+@media (min-width: 1200px) {
+  .container { padding: 0 2rem; }
+}
+
+/* ---------- Bildlaufleiste dezent einfaerben ---------- */
+
+@supports (scrollbar-color: auto) {
+  html {
+    scrollbar-color: rgba(18,23,43,0.35) transparent;
+  }
+}
+
+/* ---------- Druckansicht (Impressum, Datenschutz) ----------
+   Beim Ausdrucken verschwinden Menue, Fussleiste und Farbflaechen;
+   Links werden mit ihrer Adresse ausgeschrieben. */
+
+@media print {
+  .site-header,
+  .site-footer,
+  .skip-link,
+  .hero,
+  .actions,
+  .chips,
+  .lightbox { display: none !important; }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  main { padding: 0; }
+  section { padding: 0; border: none; }
+
+  .legal h1 { font-size: 20pt; }
+  .legal h2 {
+    font-size: 13pt;
+    margin-top: 16pt;
+    break-after: avoid;
+  }
+
+  .legal p, .legal ul { max-width: none; }
+
+  .legal-intro {
+    background: none;
+    border-left: 2pt solid #000;
+  }
+
+  a { color: #000; text-decoration: underline; }
+
+  /* Adresse hinter den Link setzen, damit sie auf Papier lesbar ist */
+  .legal a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    word-break: break-all;
+  }
+}
+
+/* ---------- Ruecksicht auf reduzierte Bewegung ----------
+   Wer im Betriebssystem "Bewegung reduzieren" eingestellt hat,
+   bekommt dieselbe Seite ohne Animationen. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .btn:hover,
+  .chip:hover,
+  .icon-btn:hover,
+  .photo-strip .ph:hover,
+  .gallery-grid a:hover,
+  .video-list-item:hover { transform: none; }
 }
