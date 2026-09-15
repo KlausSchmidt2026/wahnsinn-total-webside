@@ -3,7 +3,6 @@
   <url><loc>https://wahnsinn-total.de/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://wahnsinn-total.de/galerie.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://wahnsinn-total.de/kontakt.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://wahnsinn-total.de/shop.html</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://wahnsinn-total.de/impressum.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
   <url><loc>https://wahnsinn-total.de/datenschutz.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>
