@@ -50,6 +50,7 @@
       <nav class="main-nav" id="hauptnavigation" aria-label="Hauptnavigation">
         <ul>
           <li><a href="index.html" aria-current="page">Home</a></li>
+          <li><a href="termine.html">Termine</a></li>
           <li><a href="galerie.html">Galerie</a></li>
           <li><a href="kontakt.html">Kontakt</a></li>
           <li><a href="impressum.html">Impressum</a></li>
@@ -127,6 +128,18 @@
         <span class="chip">🎹 Keyboard</span>
         <span class="chip">🥁 Schlagzeug</span>
       </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2 style="text-align:center;">Nächste Termine</h2>
+    <div id="termine-teaser" class="termine-liste termine-liste--teaser" style="max-width:600px; margin:1.5rem auto 0;">
+      <p class="termin-hinweis" style="text-align:center;">Termine werden geladen …</p>
+    </div>
+    <div class="actions actions--center" style="margin-top:1.2rem;">
+      <a class="btn btn-outline" href="termine.html">Alle Termine ansehen</a>
     </div>
   </div>
 </section>
@@ -250,5 +263,7 @@
   }
 }
 </script>
+<script src="assets/xlsx.full.min.js"></script>
+<script>WT.initTermine('termine-teaser', { anzahl: 3 });</script>
 </body>
 </html>
