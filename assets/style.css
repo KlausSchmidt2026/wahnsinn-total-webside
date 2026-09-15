@@ -1350,15 +1350,19 @@ main > section:first-child { border-top: none; }
 }
 
 /* ============================================================
-   Termine
+   Termine – Kalenderblatt-Layout
    ============================================================ */
 
+.termine-liste { display: grid; gap: 0.9rem; }
+
 .termin-karte {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
   background: #fff;
   border: 2px solid var(--line-dark);
   border-radius: var(--radius);
-  padding: 1.1rem 1.3rem;
-  margin-bottom: 1rem;
+  overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: transform 0.18s var(--ease), box-shadow 0.18s ease;
 }
@@ -1368,44 +1372,126 @@ main > section:first-child { border-top: none; }
   box-shadow: var(--shadow-md);
 }
 
-.termin-datum {
+/* --- Das Kalenderblatt links --- */
+
+.termin-blatt {
+  flex: 0 0 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 0.4rem;
+  background: var(--navy);
+  color: #fff;
+  line-height: 1;
+  text-align: center;
+}
+
+.termin-tag {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--navy);
+  font-size: 2.1rem;
+  color: var(--gold);
 }
 
-.termin-veranstaltung {
-  font-weight: 600;
-  margin-top: 0.2rem;
-}
-
-.termin-ort {
-  color: #5a5548;
+.termin-monat {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   margin-top: 0.15rem;
 }
 
-.termin-info {
-  margin-top: 0.4rem;
+.termin-jahr {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin-top: 0.25rem;
+  letter-spacing: 0.04em;
+}
+
+/* --- Der Textteil rechts --- */
+
+.termin-inhalt {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.termin-veranstaltung {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  margin: 0;
+  color: var(--navy);
+}
+
+.termin-ort {
+  margin: 0.15rem 0 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.termin-ort::before {
+  content: "📍";
+  margin-right: 0.3rem;
+  font-size: 0.9em;
+}
+
+.termin-zeile {
+  margin: 0.3rem 0 0;
   font-size: 0.92rem;
   color: #5a5548;
 }
 
-.termin-hinweis {
-  color: rgba(245,243,238,0.85);
+.termin-info {
+  margin: 0.45rem 0 0;
+  font-size: 0.9rem;
+  color: #5a5548;
+  border-top: 1px solid var(--line-dark);
+  padding-top: 0.45rem;
 }
 
-section:not([class]) .termin-hinweis,
-.section-alt .termin-hinweis,
-.section-teal .termin-hinweis {
-  color: #5a5548;
-}
+/* --- Variante fuer die dunkle Teaser-Sektion auf der Startseite --- */
 
 .termine-liste--teaser .termin-karte {
-  background: var(--navy-soft, var(--navy));
-  border-color: transparent;
-  color: var(--cream);
+  background: var(--navy);
+  border-color: rgba(255,255,255,0.10);
 }
-.termine-liste--teaser .termin-datum { color: var(--gold); }
-.termine-liste--teaser .termin-ort,
-.termine-liste--teaser .termin-info { color: rgba(245,243,238,0.75); }
+
+.termine-liste--teaser .termin-blatt {
+  background: rgba(255,255,255,0.07);
+  border-right: 1px solid rgba(255,255,255,0.10);
+}
+
+.termine-liste--teaser .termin-veranstaltung { color: var(--cream); }
+.termine-liste--teaser .termin-ort { color: rgba(245,243,238,0.9); }
+.termine-liste--teaser .termin-zeile { color: rgba(245,243,238,0.65); }
+.termine-liste--teaser .termin-info {
+  color: rgba(245,243,238,0.65);
+  border-top-color: rgba(255,255,255,0.12);
+}
+
+/* --- Hinweistexte (laedt gerade / keine Termine / Fehler) --- */
+
+.termin-hinweis {
+  color: #5a5548;
+  text-align: center;
+  padding: 1.2rem 0;
+}
+
+.termine-liste--teaser .termin-hinweis { color: rgba(245,243,238,0.75); }
+
+/* --- Schmale Bildschirme --- */
+
+@media (max-width: 420px) {
+  .termin-blatt { flex-basis: 64px; padding: 0.75rem 0.3rem; }
+  .termin-tag { font-size: 1.8rem; }
+  .termin-monat { font-size: 0.88rem; }
+  .termin-inhalt { padding: 0.75rem 0.9rem; }
+  .termin-veranstaltung { font-size: 1.2rem; }
+}
