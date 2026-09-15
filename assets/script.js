@@ -399,6 +399,7 @@ var WT = (function () {
   // ---------------------------------------------------------------
   var WOCHENTAGE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
   var MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  var MONATE_KURZ = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
   function termineDatumParsen(wert) {
     if (wert instanceof Date && !isNaN(wert)) return wert;
@@ -417,15 +418,45 @@ var WT = (function () {
     return WOCHENTAGE[d.getDay()] + ', ' + d.getDate() + '. ' + MONATE[d.getMonth()] + ' ' + d.getFullYear();
   }
 
+  function termineTextSchuetzen(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   function termineKarteHtml(t) {
+    var d = t.datum;
+    var aktuellesJahr = new Date().getFullYear();
+    // Jahr nur zeigen, wenn der Termin nicht im laufenden Jahr liegt
+    var jahrZusatz = d.getFullYear() !== aktuellesJahr
+      ? '<span class="termin-jahr">' + d.getFullYear() + '</span>' : '';
+
+    // Zeile mit Wochentag und Uhrzeit, zusammengesetzt aus dem, was da ist
+    var zeile = [WOCHENTAGE[d.getDay()]];
+    if (t.uhrzeit) zeile.push(termineTextSchuetzen(t.uhrzeit));
+
     var teile = [
-      '<div class="termin-karte">',
-      '  <div class="termin-datum">' + termineDatumFormatieren(t.datum) + (t.uhrzeit ? ' · ' + t.uhrzeit : '') + '</div>'
+      '<article class="termin-karte">',
+      '  <div class="termin-blatt" aria-hidden="true">',
+      '    <span class="termin-tag">' + d.getDate() + '</span>',
+      '    <span class="termin-monat">' + MONATE_KURZ[d.getMonth()] + '</span>',
+      '    ' + jahrZusatz,
+      '  </div>',
+      '  <div class="termin-inhalt">',
+      '    <span class="visually-hidden">' + termineDatumFormatieren(d) + '</span>'
     ];
-    if (t.veranstaltung) teile.push('  <div class="termin-veranstaltung">' + t.veranstaltung + '</div>');
-    if (t.ort) teile.push('  <div class="termin-ort">📍 ' + t.ort + '</div>');
-    if (t.info) teile.push('  <div class="termin-info">' + t.info + '</div>');
-    teile.push('</div>');
+
+    if (t.veranstaltung) {
+      teile.push('    <h3 class="termin-veranstaltung">' + termineTextSchuetzen(t.veranstaltung) + '</h3>');
+    }
+    if (t.ort) {
+      teile.push('    <p class="termin-ort">' + termineTextSchuetzen(t.ort) + '</p>');
+    }
+    teile.push('    <p class="termin-zeile">' + zeile.join(' · ') + '</p>');
+    if (t.info) {
+      teile.push('    <p class="termin-info">' + termineTextSchuetzen(t.info) + '</p>');
+    }
+
+    teile.push('  </div>');
+    teile.push('</article>');
     return teile.join('\n');
   }
 
