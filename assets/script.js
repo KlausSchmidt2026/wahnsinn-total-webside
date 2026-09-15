@@ -13,6 +13,7 @@
      8. Sanftes Einblenden der Abschnitte beim Scrollen
      9. WT.initGalerie()  – Fotogalerie mit Lightbox (Galerieseite)
     10. WT.initVideos()   – Video-Playlist (Galerieseite)
+    11. WT.initTermine()  – Terminliste aus termine.xlsx (Startseite, Terminseite)
 
    Die Bild- und Videolisten stehen bewusst NICHT hier, sondern
    unten in galerie.html – dort sind sie leichter zu pflegen.
@@ -390,6 +391,94 @@ var WT = (function () {
   }
 
   // ---------------------------------------------------------------
+  // 11: Terminliste aus termine.xlsx
+  //     Liest die Excel-Datei im Browser aus (Bibliothek: SheetJS,
+  //     lokal unter assets/xlsx.full.min.js -- siehe termine.html).
+  //     Spalten in der Excel-Datei: Datum | Uhrzeit | Ort | Veranstaltung | Info
+  //     Zeigt nur Termine ab heute, aufsteigend sortiert.
+  // ---------------------------------------------------------------
+  var WOCHENTAGE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  var MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+  function termineDatumParsen(wert) {
+    if (wert instanceof Date && !isNaN(wert)) return wert;
+    if (typeof wert === 'string') {
+      var m = wert.trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/);
+      if (m) {
+        var tag = Number(m[1]), monat = Number(m[2]) - 1, jahr = Number(m[3]);
+        if (m[3].length === 2) jahr += 2000;
+        return new Date(jahr, monat, tag);
+      }
+    }
+    return null;
+  }
+
+  function termineDatumFormatieren(d) {
+    return WOCHENTAGE[d.getDay()] + ', ' + d.getDate() + '. ' + MONATE[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function termineKarteHtml(t) {
+    var teile = [
+      '<div class="termin-karte">',
+      '  <div class="termin-datum">' + termineDatumFormatieren(t.datum) + (t.uhrzeit ? ' · ' + t.uhrzeit : '') + '</div>'
+    ];
+    if (t.veranstaltung) teile.push('  <div class="termin-veranstaltung">' + t.veranstaltung + '</div>');
+    if (t.ort) teile.push('  <div class="termin-ort">📍 ' + t.ort + '</div>');
+    if (t.info) teile.push('  <div class="termin-info">' + t.info + '</div>');
+    teile.push('</div>');
+    return teile.join('\n');
+  }
+
+  function initTermine(containerId, optionen) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    optionen = optionen || {};
+    var maxAnzahl = optionen.anzahl || null;
+
+    if (typeof XLSX === 'undefined') {
+      container.innerHTML = '<p class="termin-hinweis">Termine konnten nicht geladen werden.</p>';
+      return;
+    }
+
+    fetch('termine.xlsx')
+      .then(function (resp) {
+        if (!resp.ok) throw new Error('termine.xlsx nicht gefunden (' + resp.status + ')');
+        return resp.arrayBuffer();
+      })
+      .then(function (buf) {
+        var wb = XLSX.read(buf, { type: 'array', cellDates: true });
+        var blatt = wb.Sheets[wb.SheetNames[0]];
+        var zeilen = XLSX.utils.sheet_to_json(blatt, { defval: '' });
+
+        var heute = new Date();
+        heute.setHours(0, 0, 0, 0);
+
+        var termine = zeilen.map(function (z) {
+          return {
+            datum: termineDatumParsen(z['Datum']),
+            uhrzeit: String(z['Uhrzeit'] || '').trim(),
+            ort: String(z['Ort'] || '').trim(),
+            veranstaltung: String(z['Veranstaltung'] || '').trim(),
+            info: String(z['Info'] || '').trim()
+          };
+        }).filter(function (t) { return t.datum && t.datum >= heute; })
+          .sort(function (a, b) { return a.datum - b.datum; });
+
+        if (maxAnzahl) termine = termine.slice(0, maxAnzahl);
+
+        if (termine.length === 0) {
+          container.innerHTML = '<p class="termin-hinweis">Aktuell sind keine Termine eingetragen – schaut bald wieder vorbei!</p>';
+          return;
+        }
+        container.innerHTML = termine.map(termineKarteHtml).join('\n');
+      })
+      .catch(function (err) {
+        container.innerHTML = '<p class="termin-hinweis">Termine konnten nicht geladen werden.</p>';
+        if (window.console) console.error('Termine:', err);
+      });
+  }
+
+  // ---------------------------------------------------------------
   // Start
   // ---------------------------------------------------------------
   function start() {
@@ -408,5 +497,5 @@ var WT = (function () {
     start();
   }
 
-  return { initGalerie: initGalerie, initVideos: initVideos };
+  return { initGalerie: initGalerie, initVideos: initVideos, initTermine: initTermine };
 })();
