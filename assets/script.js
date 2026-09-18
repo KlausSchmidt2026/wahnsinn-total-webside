@@ -246,46 +246,67 @@ var WT = (function () {
   // ---------------------------------------------------------------
   // 9: Fotogalerie mit Lightbox
   // ---------------------------------------------------------------
-  function initGalerie(bilder) {
-    var grid = document.getElementById('galerie-grid');
-    var lightbox = document.getElementById('lightbox');
-    if (!grid || !lightbox || !bilder || !bilder.length) { return; }
+  // Die Lightbox wird von der Foto- UND der Event-Galerie genutzt.
+  // Sie kennt keine feste Bildliste, sondern bekommt beim Oeffnen
+  // uebergeben, welche Bilder gerade durchblaettert werden sollen.
+  var Lightbox = (function () {
+    var lightbox, bild, zaehler, btnClose, btnPrev, btnNext;
+    var aktuelleBilder = [];
+    var index = 0;
+    var vorher = null;
+    var bereit = false;
 
-    var bild      = document.getElementById('lightbox-img');
-    var zaehler   = document.getElementById('lightbox-counter');
-    var btnClose  = lightbox.querySelector('.lightbox-close');
-    var btnPrev   = lightbox.querySelector('.lightbox-prev');
-    var btnNext   = lightbox.querySelector('.lightbox-next');
-    var index     = 0;
-    var vorher    = null; // Element, das vor dem Oeffnen den Fokus hatte
+    function aufbauen() {
+      lightbox = document.getElementById('lightbox');
+      if (!lightbox) { return false; }
+      bild     = document.getElementById('lightbox-img');
+      zaehler  = document.getElementById('lightbox-counter');
+      btnClose = lightbox.querySelector('.lightbox-close');
+      btnPrev  = lightbox.querySelector('.lightbox-prev');
+      btnNext  = lightbox.querySelector('.lightbox-next');
 
-    // Kacheln aufbauen
-    bilder.forEach(function (b, i) {
-      var a = document.createElement('a');
-      a.href = b.src;
-      a.dataset.index = i;
-      a.setAttribute('aria-label', b.alt + ' – groß ansehen');
+      btnClose.addEventListener('click', schliessen);
+      btnNext.addEventListener('click', weiter);
+      btnPrev.addEventListener('click', zurueck);
 
-      var img = document.createElement('img');
-      img.src = b.src;
-      img.alt = b.alt;
-      img.loading = 'lazy';
-      img.decoding = 'async';
+      lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox) { schliessen(); }
+      });
 
-      a.appendChild(img);
-      grid.appendChild(a);
-    });
+      document.addEventListener('keydown', function (e) {
+        if (!lightbox.classList.contains('open')) { return; }
+        if (e.key === 'Escape')     { schliessen(); }
+        if (e.key === 'ArrowRight') { weiter(); }
+        if (e.key === 'ArrowLeft')  { zurueck(); }
+      });
 
-    function aktualisieren() {
-      var b = bilder[index];
-      bild.src = b.src;
-      bild.alt = b.alt;
-      zaehler.textContent = (index + 1) + ' / ' + bilder.length;
+      // Wischen auf Touch-Geraeten: nach links = weiter, nach rechts = zurueck
+      var startX = 0;
+      lightbox.addEventListener('touchstart', function (e) {
+        startX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      lightbox.addEventListener('touchend', function (e) {
+        var diff = e.changedTouches[0].screenX - startX;
+        if (Math.abs(diff) > 40) { diff < 0 ? weiter() : zurueck(); }
+      }, { passive: true });
+
+      bereit = true;
+      return true;
     }
 
-    function oeffnen(i) {
+    function aktualisieren() {
+      var b = aktuelleBilder[index];
+      bild.src = b.src;
+      bild.alt = b.alt || '';
+      zaehler.textContent = (index + 1) + ' / ' + aktuelleBilder.length;
+    }
+
+    function oeffnen(bilder, startIndex) {
+      if (!bereit && !aufbauen()) { return; }
+      if (!bilder || !bilder.length) { return; }
+      aktuelleBilder = bilder;
+      index = startIndex || 0;
       vorher = document.activeElement;
-      index = i;
       aktualisieren();
       lightbox.classList.add('open');
       lightbox.setAttribute('aria-hidden', 'false');
@@ -300,41 +321,37 @@ var WT = (function () {
       if (vorher && vorher.focus) { vorher.focus(); }
     }
 
-    function weiter()  { index = (index + 1) % bilder.length; aktualisieren(); }
-    function zurueck() { index = (index - 1 + bilder.length) % bilder.length; aktualisieren(); }
+    function weiter()  { index = (index + 1) % aktuelleBilder.length; aktualisieren(); }
+    function zurueck() { index = (index - 1 + aktuelleBilder.length) % aktuelleBilder.length; aktualisieren(); }
 
-    grid.addEventListener('click', function (e) {
-      var link = e.target.closest('a');
-      if (!link) { return; }
+    return { oeffnen: oeffnen };
+  })();
+
+  function kachelBauen(b, i, bilder) {
+    var a = document.createElement('a');
+    a.href = b.src;
+    a.setAttribute('aria-label', (b.alt || 'Foto') + ' – groß ansehen');
+    a.addEventListener('click', function (e) {
       e.preventDefault();
-      oeffnen(Number(link.dataset.index));
+      Lightbox.oeffnen(bilder, i);
     });
 
-    btnClose.addEventListener('click', schliessen);
-    btnNext.addEventListener('click', weiter);
-    btnPrev.addEventListener('click', zurueck);
+    var img = document.createElement('img');
+    img.src = b.src;
+    img.alt = b.alt || '';
+    img.loading = 'lazy';
+    img.decoding = 'async';
 
-    lightbox.addEventListener('click', function (e) {
-      if (e.target === lightbox) { schliessen(); }
+    a.appendChild(img);
+    return a;
+  }
+
+  function initGalerie(bilder) {
+    var grid = document.getElementById('galerie-grid');
+    if (!grid || !bilder || !bilder.length) { return; }
+    bilder.forEach(function (b, i) {
+      grid.appendChild(kachelBauen(b, i, bilder));
     });
-
-    document.addEventListener('keydown', function (e) {
-      if (!lightbox.classList.contains('open')) { return; }
-      if (e.key === 'Escape')     { schliessen(); }
-      if (e.key === 'ArrowRight') { weiter(); }
-      if (e.key === 'ArrowLeft')  { zurueck(); }
-    });
-
-    // Wischen auf Touch-Geraeten: nach links = weiter, nach rechts = zurueck
-    var startX = 0;
-    lightbox.addEventListener('touchstart', function (e) {
-      startX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    lightbox.addEventListener('touchend', function (e) {
-      var diff = e.changedTouches[0].screenX - startX;
-      if (Math.abs(diff) > 40) { diff < 0 ? weiter() : zurueck(); }
-    }, { passive: true });
   }
 
   // ---------------------------------------------------------------
@@ -510,6 +527,160 @@ var WT = (function () {
   }
 
   // ---------------------------------------------------------------
+  // 12: Event-Galerie – Fotos vergangener Auftritte
+  //
+  //     SO PFLEGT MAN SIE (kein Eingriff in den Seitenquelltext noetig):
+  //     Bei GitHub im Ordner  assets/events/  einen Unterordner anlegen
+  //     und die Fotos hineinladen. Der Ordnername wird zur Ueberschrift.
+  //
+  //       assets/events/2026-09-18 Weinfest Remagen/foto1.jpg
+  //       assets/events/2026-10-03 Kirmes Unkelbach/foto1.jpg
+  //
+  //     Beginnt der Ordnername mit einem Datum (JJJJ-MM-TT), wird das
+  //     Datum abgetrennt und angezeigt, und die Events werden danach
+  //     sortiert (neueste zuerst). Ohne Datum: alphabetisch am Ende.
+  //
+  //     Technisch: Die Seite fragt den Dateibaum ueber die oeffentliche
+  //     GitHub-Schnittstelle ab (ein einziger Aufruf) und merkt sich das
+  //     Ergebnis 30 Minuten im Browser, damit nicht bei jedem Aufruf neu
+  //     angefragt wird.
+  // ---------------------------------------------------------------
+  var EVENT_REPO   = 'KlausSchmidt2026/wahnsinn-total-webside';
+  var EVENT_BRANCH = 'main';
+  var EVENT_ORDNER = 'assets/events';
+  var EVENT_CACHE_MINUTEN = 30;
+  var BILD_ENDUNGEN = /\.(jpe?g|png|webp|gif)$/i;
+
+  function eventBaumHolen() {
+    var cacheSchluessel = 'wt-eventbaum';
+    // Zwischengespeichertes Ergebnis nutzen, solange es frisch genug ist
+    try {
+      var roh = sessionStorage.getItem(cacheSchluessel);
+      if (roh) {
+        var gecacht = JSON.parse(roh);
+        var alterMinuten = (Date.now() - gecacht.zeit) / 60000;
+        if (alterMinuten < EVENT_CACHE_MINUTEN) {
+          return Promise.resolve(gecacht.pfade);
+        }
+      }
+    } catch (e) { /* kein Cache verfuegbar, dann eben frisch laden */ }
+
+    var url = 'https://api.github.com/repos/' + EVENT_REPO +
+              '/git/trees/' + EVENT_BRANCH + '?recursive=1';
+
+    return fetch(url)
+      .then(function (resp) {
+        if (!resp.ok) throw new Error('GitHub-Abfrage fehlgeschlagen (' + resp.status + ')');
+        return resp.json();
+      })
+      .then(function (daten) {
+        var pfade = (daten.tree || [])
+          .filter(function (eintrag) {
+            return eintrag.type === 'blob' &&
+                   eintrag.path.indexOf(EVENT_ORDNER + '/') === 0 &&
+                   BILD_ENDUNGEN.test(eintrag.path);
+          })
+          .map(function (eintrag) { return eintrag.path; });
+
+        try {
+          sessionStorage.setItem(cacheSchluessel, JSON.stringify({ zeit: Date.now(), pfade: pfade }));
+        } catch (e) { /* Speichern nicht moeglich, nicht weiter schlimm */ }
+
+        return pfade;
+      });
+  }
+
+  function eventNameZerlegen(ordnername) {
+    // "2026-09-18 Weinfest Remagen" -> Datum + "Weinfest Remagen"
+    var m = ordnername.match(/^(\d{4})-(\d{2})-(\d{2})[ _-]+(.*)$/);
+    if (m) {
+      return {
+        datum: new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])),
+        titel: m[4].trim()
+      };
+    }
+    return { datum: null, titel: ordnername };
+  }
+
+  function eventsAusPfaden(pfade) {
+    var nachOrdner = {};
+    pfade.forEach(function (pfad) {
+      var rest = pfad.slice(EVENT_ORDNER.length + 1);
+      var teile = rest.split('/');
+      if (teile.length < 2) { return; }  // Bild liegt direkt im events-Ordner
+      var ordner = teile[0];
+      if (!nachOrdner[ordner]) { nachOrdner[ordner] = []; }
+      nachOrdner[ordner].push(pfad);
+    });
+
+    return Object.keys(nachOrdner).map(function (ordner) {
+      var info = eventNameZerlegen(ordner);
+      return {
+        titel: info.titel,
+        datum: info.datum,
+        bilder: nachOrdner[ordner].sort().map(function (pfad) {
+          return {
+            // Leerzeichen und Sonderzeichen im Ordnernamen fuer die URL kodieren
+            src: pfad.split('/').map(encodeURIComponent).join('/'),
+            alt: info.titel
+          };
+        })
+      };
+    }).sort(function (a, b) {
+      if (a.datum && b.datum) { return b.datum - a.datum; }  // neueste zuerst
+      if (a.datum) { return -1; }
+      if (b.datum) { return 1; }
+      return a.titel.localeCompare(b.titel, 'de');
+    });
+  }
+
+  function eventUeberschrift(ev) {
+    if (!ev.datum) { return ev.titel; }
+    return ev.titel + ' <span class="event-datum">' +
+           ev.datum.getDate() + '. ' + MONATE[ev.datum.getMonth()] + ' ' +
+           ev.datum.getFullYear() + '</span>';
+  }
+
+  function initEventGalerie(containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) { return; }
+
+    eventBaumHolen()
+      .then(function (pfade) {
+        var events = eventsAusPfaden(pfade);
+
+        if (!events.length) {
+          container.innerHTML = '<p class="event-hinweis">Hier erscheinen bald Fotos vergangener Auftritte.</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+        events.forEach(function (ev) {
+          var block = document.createElement('section');
+          block.className = 'event-block';
+
+          var h = document.createElement('h3');
+          h.className = 'event-titel';
+          h.innerHTML = eventUeberschrift(ev);
+          block.appendChild(h);
+
+          var grid = document.createElement('div');
+          grid.className = 'gallery-grid';
+          ev.bilder.forEach(function (b, i) {
+            grid.appendChild(kachelBauen(b, i, ev.bilder));
+          });
+          block.appendChild(grid);
+
+          container.appendChild(block);
+        });
+      })
+      .catch(function (err) {
+        container.innerHTML = '<p class="event-hinweis">Die Fotos vergangener Auftritte konnten gerade nicht geladen werden.</p>';
+        if (window.console) console.error('Event-Galerie:', err);
+      });
+  }
+
+  // ---------------------------------------------------------------
   // Start
   // ---------------------------------------------------------------
   function start() {
@@ -528,5 +699,10 @@ var WT = (function () {
     start();
   }
 
-  return { initGalerie: initGalerie, initVideos: initVideos, initTermine: initTermine };
+  return {
+    initGalerie: initGalerie,
+    initVideos: initVideos,
+    initTermine: initTermine,
+    initEventGalerie: initEventGalerie
+  };
 })();
