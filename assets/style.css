@@ -1495,3 +1495,50 @@ main > section:first-child { border-top: none; }
   .termin-inhalt { padding: 0.75rem 0.9rem; }
   .termin-veranstaltung { font-size: 1.2rem; }
 }
+
+/* ============================================================
+   Event-Galerie – Fotos vergangener Auftritte
+   ============================================================ */
+
+.event-block { margin-bottom: 2.6rem; }
+.event-block:last-child { margin-bottom: 0; }
+
+.event-titel {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin: 0 0 0.9rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 2px solid var(--gold);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.event-datum {
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #5a5548;
+  letter-spacing: 0;
+}
+
+.event-hinweis {
+  text-align: center;
+  color: #5a5548;
+  padding: 1.5rem 0;
+}
+
+/* In den Event-Bloecken duerfen die Kacheln etwas kleiner sein –
+   es sind meist mehr Bilder als in der Hauptgalerie. */
+.event-block .gallery-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+@media (max-width: 480px) {
+  .event-block .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .event-titel { font-size: 1.3rem; }
+}
