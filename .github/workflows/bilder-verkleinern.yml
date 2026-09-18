@@ -1,0 +1,111 @@
+name: Event-Fotos verkleinern
+
+on:
+  push:
+    paths:
+      - 'assets/events/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verkleinern:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Pillow installieren
+        run: pip install --quiet Pillow
+
+      - name: Bilder verkleinern
+        run: |
+          python - <<'PYTHON_ENDE'
+          import os, io
+          from PIL import Image, ImageOps
+
+          ORDNER = "assets/events"
+          MAX_BYTES = 1 * 1024 * 1024     # Zielgroesse 1 MB
+          MAX_KANTE = 2000                # laengste Bildkante in Pixeln
+          START_QUALITAET = 85
+          MIN_QUALITAET = 45
+          ENDUNGEN = (".jpg", ".jpeg", ".png", ".webp")
+
+          def als_jpeg(img, q):
+              puffer = io.BytesIO()
+              img.save(puffer, format="JPEG", quality=q, optimize=True, progressive=True)
+              return puffer.getvalue()
+
+          def verarbeite(pfad):
+              vorher = os.path.getsize(pfad)
+              if vorher <= MAX_BYTES:
+                  return False
+              try:
+                  img = Image.open(pfad)
+              except Exception as e:
+                  print("  uebersprungen (nicht lesbar):", pfad, e)
+                  return False
+
+              # EXIF-Drehung anwenden, sonst kippen Hochformat-Fotos
+              img = ImageOps.exif_transpose(img)
+
+              # Transparenz auf weissen Hintergrund legen, damit JPEG geht
+              if img.mode in ("RGBA", "LA", "P"):
+                  hg = Image.new("RGB", img.size, (255, 255, 255))
+                  img = img.convert("RGBA")
+                  hg.paste(img, mask=img.split()[-1])
+                  img = hg
+              elif img.mode != "RGB":
+                  img = img.convert("RGB")
+
+              b, h = img.size
+              if max(b, h) > MAX_KANTE:
+                  neu = (MAX_KANTE, round(h * MAX_KANTE / b)) if b >= h else (round(b * MAX_KANTE / h), MAX_KANTE)
+                  img = img.resize(neu, Image.LANCZOS)
+
+              q = START_QUALITAET
+              daten = als_jpeg(img, q)
+              while len(daten) > MAX_BYTES and q > MIN_QUALITAET:
+                  q -= 5
+                  daten = als_jpeg(img, q)
+
+              if len(daten) >= vorher:
+                  return False
+
+              with open(pfad, "wb") as f:
+                  f.write(daten)
+              print("  verkleinert: %s  %.2f MB -> %.2f MB (%dx%d, Qualitaet %d)"
+                    % (pfad, vorher/1048576, len(daten)/1048576, img.size[0], img.size[1], q))
+              return True
+
+          if not os.path.isdir(ORDNER):
+              print("Ordner '%s' existiert noch nicht - nichts zu tun." % ORDNER)
+          else:
+              geprueft = geaendert = 0
+              for wurzel, _, dateien in os.walk(ORDNER):
+                  for name in sorted(dateien):
+                      if name.lower().endswith(ENDUNGEN):
+                          geprueft += 1
+                          if verarbeite(os.path.join(wurzel, name)):
+                              geaendert += 1
+              print("\n%d Bild(er) geprueft, %d verkleinert." % (geprueft, geaendert))
+          PYTHON_ENDE
+
+      - name: Geaenderte Bilder zurueckschreiben
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "Event-Fotos automatisch verkleinert [skip ci]"
+            git push
+            echo "Verkleinerte Bilder wurden zurueckgeschrieben."
+          else
+            echo "Keine Aenderungen - alle Bilder waren bereits klein genug."
+          fi
