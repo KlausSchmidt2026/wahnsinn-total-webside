@@ -110,6 +110,16 @@
   </div>
 </section>
 
+<section>
+  <div class="container">
+    <h2>Rückblick: unsere Auftritte</h2>
+    <p class="lead lead--tight measure">Fotos von vergangenen Festen und Sitzungen – nach Veranstaltung sortiert.</p>
+    <div id="event-galerie" class="event-galerie">
+      <p class="event-hinweis">Fotos werden geladen …</p>
+    </div>
+  </div>
+</section>
+
 <section class="section-alt">
   <div class="container container--center">
     <h2>Auch bei eurem Fest dabei sein?</h2>
@@ -188,6 +198,10 @@ const videos = [
 
 WT.initGalerie(galerieBilder);
 WT.initVideos(videos);
+
+// Fotos vergangener Auftritte – braucht keine Liste hier:
+// holt sich die Ordner unter assets/events/ automatisch von GitHub.
+WT.initEventGalerie('event-galerie');
 </script>
 </body>
 </html>
