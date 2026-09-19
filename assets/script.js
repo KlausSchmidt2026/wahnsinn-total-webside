@@ -549,7 +549,8 @@ var WT = (function () {
   var EVENT_BRANCH = 'main';
   var EVENT_ORDNER = 'assets/events';
   var EVENT_CACHE_MINUTEN = 30;
-  var BILD_ENDUNGEN = /\.(jpe?g|png|webp|gif)$/i;
+  var BILD_ENDUNGEN  = /\.(jpe?g|png|webp|gif)$/i;
+  var VIDEO_ENDUNGEN = /\.(mp4|webm|m4v)$/i;
 
   function eventBaumHolen() {
     var cacheSchluessel = 'wt-eventbaum';
@@ -578,7 +579,7 @@ var WT = (function () {
           .filter(function (eintrag) {
             return eintrag.type === 'blob' &&
                    eintrag.path.indexOf(EVENT_ORDNER + '/') === 0 &&
-                   BILD_ENDUNGEN.test(eintrag.path);
+                   (BILD_ENDUNGEN.test(eintrag.path) || VIDEO_ENDUNGEN.test(eintrag.path));
           })
           .map(function (eintrag) { return eintrag.path; });
 
@@ -615,16 +616,21 @@ var WT = (function () {
 
     return Object.keys(nachOrdner).map(function (ordner) {
       var info = eventNameZerlegen(ordner);
+      var dateien = nachOrdner[ordner].sort();
+
+      // Leerzeichen und Sonderzeichen im Ordnernamen fuer die URL kodieren
+      function alsQuelle(pfad) {
+        return {
+          src: pfad.split('/').map(encodeURIComponent).join('/'),
+          alt: info.titel
+        };
+      }
+
       return {
         titel: info.titel,
         datum: info.datum,
-        bilder: nachOrdner[ordner].sort().map(function (pfad) {
-          return {
-            // Leerzeichen und Sonderzeichen im Ordnernamen fuer die URL kodieren
-            src: pfad.split('/').map(encodeURIComponent).join('/'),
-            alt: info.titel
-          };
-        })
+        bilder: dateien.filter(function (p) { return BILD_ENDUNGEN.test(p); }).map(alsQuelle),
+        videos: dateien.filter(function (p) { return VIDEO_ENDUNGEN.test(p); }).map(alsQuelle)
       };
     }).sort(function (a, b) {
       if (a.datum && b.datum) { return b.datum - a.datum; }  // neueste zuerst
@@ -664,12 +670,30 @@ var WT = (function () {
           h.innerHTML = eventUeberschrift(ev);
           block.appendChild(h);
 
-          var grid = document.createElement('div');
-          grid.className = 'gallery-grid';
-          ev.bilder.forEach(function (b, i) {
-            grid.appendChild(kachelBauen(b, i, ev.bilder));
-          });
-          block.appendChild(grid);
+          if (ev.bilder.length) {
+            var grid = document.createElement('div');
+            grid.className = 'gallery-grid';
+            ev.bilder.forEach(function (b, i) {
+              grid.appendChild(kachelBauen(b, i, ev.bilder));
+            });
+            block.appendChild(grid);
+          }
+
+          // Videos bekommen einen eigenen Player je Datei (nicht in der
+          // Lightbox, damit Ton und Vollbild wie gewohnt funktionieren)
+          if (ev.videos.length) {
+            var videoGrid = document.createElement('div');
+            videoGrid.className = 'event-videos';
+            ev.videos.forEach(function (v) {
+              var video = document.createElement('video');
+              video.src = v.src;
+              video.controls = true;
+              video.playsInline = true;
+              video.preload = 'metadata';
+              videoGrid.appendChild(video);
+            });
+            block.appendChild(videoGrid);
+          }
 
           container.appendChild(block);
         });

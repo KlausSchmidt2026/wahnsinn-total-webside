@@ -1542,3 +1542,20 @@ main > section:first-child { border-top: none; }
   }
   .event-titel { font-size: 1.3rem; }
 }
+
+/* Videos innerhalb eines Event-Blocks */
+
+.event-videos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.9rem;
+}
+
+.event-videos video {
+  width: 100%;
+  border-radius: var(--radius);
+  background: #000;
+  box-shadow: var(--shadow-sm);
+  display: block;
+}
