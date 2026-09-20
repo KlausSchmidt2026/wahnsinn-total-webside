@@ -908,14 +908,26 @@ footer.site-footer .container {
   align-items: center;
 }
 
-footer.site-footer a {
+footer.site-footer a,
+footer.site-footer button.mail-link-obf {
   text-decoration: none;
   transition: color 0.18s ease;
 }
-footer.site-footer a:hover {
+footer.site-footer a:hover,
+footer.site-footer button.mail-link-obf:hover {
   color: var(--gold);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+footer.site-footer button.mail-link-obf {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 }
 
 footer.site-footer ul {
