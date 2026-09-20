@@ -51,22 +51,6 @@ var WT = (function () {
 
     var mailHeader = document.getElementById('mail-header-link');
     if (mailHeader) { mailHeader.href = 'mailto:' + mail; }
-
-    // Footer-Button: Adresse erscheint erst nach Klick (wie auf der
-    // Kontaktseite) -- sonst stuende sie im gerenderten Footer jeder
-    // Seite dauerhaft als Klartext.
-    Array.prototype.forEach.call(
-      document.querySelectorAll('.mail-link-obf'),
-      function (btn) {
-        btn.addEventListener('click', function () {
-          var link = document.createElement('a');
-          link.href = 'mailto:' + mail;
-          link.textContent = mail;
-          btn.replaceWith(link);
-          link.focus();
-        });
-      }
-    );
   }
 
   // ---------------------------------------------------------------
