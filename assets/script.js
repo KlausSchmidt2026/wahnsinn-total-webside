@@ -484,7 +484,9 @@ var WT = (function () {
       return;
     }
 
-    fetch('termine.xlsx')
+    // ?v=... und no-store: immer die frisch hochgeladene Datei holen,
+    // nicht eine zwischengespeicherte aeltere Version
+    fetch('termine.xlsx?v=' + Date.now(), { cache: 'no-store' })
       .then(function (resp) {
         if (!resp.ok) throw new Error('termine.xlsx nicht gefunden (' + resp.status + ')');
         return resp.arrayBuffer();
