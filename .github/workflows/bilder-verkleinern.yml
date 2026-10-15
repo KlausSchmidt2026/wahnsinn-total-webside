@@ -1,9 +1,10 @@
-name: Event-Fotos verkleinern
+name: Fotos verkleinern (Events + Galerie)
 
 on:
   push:
     paths:
       - 'assets/events/**'
+      - 'assets/galerie/**'
   workflow_dispatch:
 
 permissions:
@@ -30,7 +31,7 @@ jobs:
           import os, io
           from PIL import Image, ImageOps
 
-          ORDNER = "assets/events"
+          ORDNER_LISTE = ["assets/events", "assets/galerie"]
           MAX_BYTES = 1 * 1024 * 1024     # Zielgroesse 1 MB
           MAX_KANTE = 2000                # laengste Bildkante in Pixeln
           START_QUALITAET = 85
@@ -84,17 +85,18 @@ jobs:
                     % (pfad, vorher/1048576, len(daten)/1048576, img.size[0], img.size[1], q))
               return True
 
-          if not os.path.isdir(ORDNER):
-              print("Ordner '%s' existiert noch nicht - nichts zu tun." % ORDNER)
-          else:
-              geprueft = geaendert = 0
+          geprueft = geaendert = 0
+          for ORDNER in ORDNER_LISTE:
+              if not os.path.isdir(ORDNER):
+                  print("Ordner '%s' existiert noch nicht - uebersprungen." % ORDNER)
+                  continue
               for wurzel, _, dateien in os.walk(ORDNER):
                   for name in sorted(dateien):
                       if name.lower().endswith(ENDUNGEN):
                           geprueft += 1
                           if verarbeite(os.path.join(wurzel, name)):
                               geaendert += 1
-              print("\n%d Bild(er) geprueft, %d verkleinert." % (geprueft, geaendert))
+          print("\n%d Bild(er) geprueft, %d verkleinert." % (geprueft, geaendert))
           PYTHON_ENDE
 
       - name: Geaenderte Bilder zurueckschreiben
@@ -103,7 +105,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -n "$(git status --porcelain)" ]; then
             git add -A
-            git commit -m "Event-Fotos automatisch verkleinert [skip ci]"
+            git commit -m "Fotos automatisch verkleinert [skip ci]"
             git push
             echo "Verkleinerte Bilder wurden zurueckgeschrieben."
           else
