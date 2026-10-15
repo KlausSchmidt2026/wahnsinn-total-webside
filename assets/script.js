@@ -332,6 +332,11 @@ var WT = (function () {
     img.alt = b.alt || '';
     img.loading = 'lazy';
     img.decoding = 'async';
+    // Geloeschtes oder gerade erst hochgeladenes (noch nicht veroeffentlichtes)
+    // Foto: Kachel einfach ausblenden statt ein kaputtes Bild zu zeigen
+    img.addEventListener('error', function () {
+      if (a.parentNode) { a.parentNode.removeChild(a); }
+    });
 
     a.appendChild(img);
     return a;
@@ -539,12 +544,21 @@ var WT = (function () {
   var EVENT_REPO   = 'KlausSchmidt2026/wahnsinn-total-webside';
   var EVENT_BRANCH = 'main';
   var EVENT_ORDNER = 'assets/events';
-  var EVENT_CACHE_MINUTEN = 30;
+  var GALERIE_ORDNER = 'assets/galerie';
+  var EVENT_CACHE_MINUTEN = 10;
   var BILD_ENDUNGEN  = /\.(jpe?g|png|webp|gif)$/i;
   var VIDEO_ENDUNGEN = /\.(mp4|webm|m4v)$/i;
 
+  // Holt alle Foto-/Videopfade aus assets/events/ UND assets/galerie/
+  // mit einem einzigen Aufruf; beide Galerien teilen sich das Ergebnis.
+  var baumAnfrage = null;
   function eventBaumHolen() {
-    var cacheSchluessel = 'wt-eventbaum';
+    if (!baumAnfrage) { baumAnfrage = repoBaumLaden(); }
+    return baumAnfrage;
+  }
+
+  function repoBaumLaden() {
+    var cacheSchluessel = 'wt-repobaum';
     // Zwischengespeichertes Ergebnis nutzen, solange es frisch genug ist
     try {
       var roh = sessionStorage.getItem(cacheSchluessel);
@@ -569,7 +583,8 @@ var WT = (function () {
         var pfade = (daten.tree || [])
           .filter(function (eintrag) {
             return eintrag.type === 'blob' &&
-                   eintrag.path.indexOf(EVENT_ORDNER + '/') === 0 &&
+                   (eintrag.path.indexOf(EVENT_ORDNER + '/') === 0 ||
+                    eintrag.path.indexOf(GALERIE_ORDNER + '/') === 0) &&
                    (BILD_ENDUNGEN.test(eintrag.path) || VIDEO_ENDUNGEN.test(eintrag.path));
           })
           .map(function (eintrag) { return eintrag.path; });
@@ -597,6 +612,7 @@ var WT = (function () {
   function eventsAusPfaden(pfade) {
     var nachOrdner = {};
     pfade.forEach(function (pfad) {
+      if (pfad.indexOf(EVENT_ORDNER + '/') !== 0) { return; }
       var rest = pfad.slice(EVENT_ORDNER.length + 1);
       var teile = rest.split('/');
       if (teile.length < 2) { return; }  // Bild liegt direkt im events-Ordner
@@ -696,6 +712,53 @@ var WT = (function () {
   }
 
   // ---------------------------------------------------------------
+  // 13: Haupt-Galerie aus dem Ordner assets/galerie/
+  //     Klaus laedt Fotos einfach in den Ordner hoch oder loescht sie
+  //     dort – die Galerie zeigt automatisch genau diese Fotos.
+  //     Reihenfolge = alphabetisch nach Dateiname (01-..., 02-..., ...).
+  //     ersatzListe wird nur benutzt, wenn GitHub gerade nicht antwortet.
+  // ---------------------------------------------------------------
+  function altTextAusDatei(pfad) {
+    // "03-open-air-weitwinkel.jpg" -> "Open air weitwinkel";
+    // Kameranamen wie "IMG-20261015-WA0003.jpg" -> allgemeiner Text
+    var name = pfad.split('/').pop().replace(/\.[^.]+$/, '');
+    name = name.replace(/^\d{1,3}[-_ ]+/, '');
+    if (!name || /^(img|vid|dsc|pxl|photo|foto|wa)?[-_ ]?\d/i.test(name)) {
+      return 'Foto von Wahnsinn Total';
+    }
+    name = name.replace(/[-_]+/g, ' ').trim();
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  function initOrdnerGalerie(ersatzListe) {
+    var grid = document.getElementById('galerie-grid');
+    if (!grid) { return; }
+
+    // Bekannte Fotos behalten ihre handgeschriebene Beschreibung
+    var bekannteTexte = {};
+    (ersatzListe || []).forEach(function (b) { bekannteTexte[b.src] = b.alt; });
+
+    eventBaumHolen()
+      .then(function (pfade) {
+        var bilder = pfade
+          .filter(function (p) {
+            return p.indexOf(GALERIE_ORDNER + '/') === 0 && BILD_ENDUNGEN.test(p);
+          })
+          .sort(function (a, b) { return a.localeCompare(b, 'de', { numeric: true }); })
+          .map(function (p) {
+            var src = p.split('/').map(encodeURIComponent).join('/');
+            return { src: src, alt: bekannteTexte[p] || bekannteTexte[src] || altTextAusDatei(p) };
+          });
+        if (!bilder.length) { throw new Error('Ordner assets/galerie ist leer'); }
+        initGalerie(bilder);
+      })
+      .catch(function (err) {
+        if (window.console) console.warn('Galerie: nutze Ersatzliste –', err);
+        initGalerie(ersatzListe || []);
+      });
+  }
+
+  // ---------------------------------------------------------------
   // Start
   // ---------------------------------------------------------------
   function start() {
@@ -716,6 +779,7 @@ var WT = (function () {
 
   return {
     initGalerie: initGalerie,
+    initOrdnerGalerie: initOrdnerGalerie,
     initVideos: initVideos,
     initTermine: initTermine,
     initEventGalerie: initEventGalerie
