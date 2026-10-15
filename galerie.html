@@ -144,35 +144,40 @@
 <script src="assets/script.js"></script>
 <script>
 // ============================================================
-//  GALERIE-BILDER
-//  Neues Foto aufnehmen:
-//  1. Bilddatei bei GitHub nach assets/img/ hochladen
-//     (Upload-URL: .../upload/main/assets/img)
-//  2. Hier unten eine neue Zeile ergaenzen, z. B.:
-//     { src: 'assets/img/mein-neues-foto.jpg', alt: 'Kurze Beschreibung' },
-//  Die Reihenfolge in der Liste ist die Reihenfolge in der Galerie.
+//  GALERIE-BILDER – kommen automatisch aus dem Ordner assets/galerie/
+//
+//  Foto hinzufuegen: Bild bei GitHub in assets/galerie/ hochladen.
+//  Foto entfernen:   Bild dort loeschen.
+//  Hier muss dafuer NICHTS geaendert werden.
+//
+//  Reihenfolge = alphabetisch nach Dateiname. Wer ein Foto vorne haben
+//  will, gibt ihm z. B. den Namen "00-sitzung-2027.jpg".
+//  Fotos ueber 1 MB werden nach dem Hochladen automatisch verkleinert.
+//
+//  Die Liste unten ist nur eine Reserve, falls GitHub kurz nicht
+//  erreichbar ist. Sie muss nicht gepflegt werden.
 // ============================================================
-const galerieBilder = [
-  { src: 'assets/img/publikum-mendenfest.jpg',      alt: 'Begeistertes Publikum beim Mendener Sommerfest' },
-  { src: 'assets/img/buehne-abend-duo.jpg',         alt: 'Wahnsinn Total abends auf der Bühne' },
-  { src: 'assets/img/open-air-weitwinkel.jpg',      alt: 'Open-Air-Bühne beim Mendener Sommerfest' },
-  { src: 'assets/img/saenger-nahaufnahme-1.jpg',    alt: 'Sänger am Mikrofon, Nahaufnahme' },
-  { src: 'assets/img/keyboarder-nahaufnahme-1.jpg', alt: 'Keyboarder am Mikrofon, Nahaufnahme' },
-  { src: 'assets/img/open-air-duo-2.jpg',           alt: 'Duo auf der Open-Air-Bühne' },
-  { src: 'assets/img/keyboarder-nahaufnahme-2.jpg', alt: 'Keyboarder singend, Nahaufnahme' },
-  { src: 'assets/img/open-air-duo-3.jpg',           alt: 'Bühnenaufbau beim Mendener Sommerfest' },
-  { src: 'assets/img/saenger-nahaufnahme-2.jpg',    alt: 'Sänger am Schlagzeug, Nahaufnahme' },
-  { src: 'assets/img/band-backstage-1.jpg',         alt: 'Wahnsinn Total backstage vor dem Auftritt' },
-  { src: 'assets/img/band-drums.jpg',               alt: 'Schlagzeug mit Wahnsinn-Total-Logo' },
-  { src: 'assets/img/band-festival.jpg',            alt: 'Auftritt mit Stadtwerke-Sankt-Augustin-Banner' },
-  { src: 'assets/img/band-zelt-1.jpg',              alt: 'Wahnsinn Total live im Festzelt' },
-  { src: 'assets/img/band-zelt-2.jpg',              alt: 'Gut gelaunt auf der Bühne' },
-  { src: 'assets/img/band-keyboarder.jpg',          alt: 'Keyboarder auf der Bühne' },
-  { src: 'assets/img/band-drummer-solo.jpg',        alt: 'Schlagzeuger mit Hut' },
-  { src: 'assets/img/band-naeh-rot.jpg',            alt: 'Duo im Ringelshirt bei rotem Bühnenlicht' },
-  { src: 'assets/img/band-backstage-2.jpg',         alt: 'Backstage vor dem gelben Bandbanner' },
-  { src: 'assets/img/band-open-air.jpg',            alt: 'Open-Air-Auftritt mit Publikum-Banner' },
-  { src: 'assets/img/band-zelt-3.jpg',              alt: 'Duo im Festzelt mit Lichterkette' }
+const galerieReserve = [
+  { src: 'assets/galerie/01-publikum-mendenfest.jpg', alt: 'Begeistertes Publikum beim Mendener Sommerfest' },
+  { src: 'assets/galerie/02-buehne-abend-duo.jpg', alt: 'Wahnsinn Total abends auf der Bühne' },
+  { src: 'assets/galerie/03-open-air-weitwinkel.jpg', alt: 'Open-Air-Bühne beim Mendener Sommerfest' },
+  { src: 'assets/galerie/04-saenger-nahaufnahme-1.jpg', alt: 'Sänger am Mikrofon, Nahaufnahme' },
+  { src: 'assets/galerie/05-keyboarder-nahaufnahme-1.jpg', alt: 'Keyboarder am Mikrofon, Nahaufnahme' },
+  { src: 'assets/galerie/06-open-air-duo-2.jpg', alt: 'Duo auf der Open-Air-Bühne' },
+  { src: 'assets/galerie/07-keyboarder-nahaufnahme-2.jpg', alt: 'Keyboarder singend, Nahaufnahme' },
+  { src: 'assets/galerie/08-open-air-duo-3.jpg', alt: 'Bühnenaufbau beim Mendener Sommerfest' },
+  { src: 'assets/galerie/09-saenger-nahaufnahme-2.jpg', alt: 'Sänger am Schlagzeug, Nahaufnahme' },
+  { src: 'assets/galerie/10-band-backstage-1.jpg', alt: 'Wahnsinn Total backstage vor dem Auftritt' },
+  { src: 'assets/galerie/11-band-drums.jpg', alt: 'Schlagzeug mit Wahnsinn-Total-Logo' },
+  { src: 'assets/galerie/12-band-festival.jpg', alt: 'Auftritt mit Stadtwerke-Sankt-Augustin-Banner' },
+  { src: 'assets/galerie/13-band-zelt-1.jpg', alt: 'Wahnsinn Total live im Festzelt' },
+  { src: 'assets/galerie/14-band-zelt-2.jpg', alt: 'Gut gelaunt auf der Bühne' },
+  { src: 'assets/galerie/15-band-keyboarder.jpg', alt: 'Keyboarder auf der Bühne' },
+  { src: 'assets/galerie/16-band-drummer-solo.jpg', alt: 'Schlagzeuger mit Hut' },
+  { src: 'assets/galerie/17-band-naeh-rot.jpg', alt: 'Duo im Ringelshirt bei rotem Bühnenlicht' },
+  { src: 'assets/galerie/18-band-backstage-2.jpg', alt: 'Backstage vor dem gelben Bandbanner' },
+  { src: 'assets/galerie/19-band-open-air.jpg', alt: 'Open-Air-Auftritt mit Publikum-Banner' },
+  { src: 'assets/galerie/20-band-zelt-3.jpg', alt: 'Duo im Festzelt mit Lichterkette' }
 ];
 
 // ============================================================
@@ -195,7 +200,7 @@ const videos = [
   { src: 'assets/videos/video-7.mp4', title: 'Video 7' }
 ];
 
-WT.initGalerie(galerieBilder);
+WT.initOrdnerGalerie(galerieReserve);
 WT.initVideos(videos);
 
 // Fotos vergangener Auftritte – braucht keine Liste hier:
