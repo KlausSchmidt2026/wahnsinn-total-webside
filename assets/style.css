@@ -434,16 +434,19 @@ nav.main-nav a[aria-current="page"]::after {
   background: rgba(255,255,255,0.08);
 }
 
-/* Auf hellem Grund braucht der Umriss-Button dunkle Kontraste */
+/* Auf hellem Grund braucht der Umriss-Button dunkle Kontraste.
+   (Nicht mehr "section:not([class])": script.js gibt jedem Abschnitt
+   die Klasse .reveal, dadurch griff die Regel nie und der Button war
+   hell auf hellem Grund unsichtbar.) */
 .section-alt .btn-outline,
 .section-teal .btn-outline,
-section:not([class]) .btn-outline {
+main > section:where(:not(.hero)) .btn-outline {
   border-color: rgba(18,23,43,0.35);
   color: var(--navy);
 }
 .section-alt .btn-outline:hover,
 .section-teal .btn-outline:hover,
-section:not([class]) .btn-outline:hover {
+main > section:where(:not(.hero)) .btn-outline:hover {
   border-color: var(--navy);
   background: rgba(18,23,43,0.06);
 }
@@ -493,7 +496,8 @@ section { padding: 4rem 0; }
 /* Frueher lag zwischen JEDEN zwei Abschnitten eine graue Linie – auch
    dort, wo ohnehin die Hintergrundfarbe wechselt. Die Linie erscheint
    jetzt nur noch zwischen zwei gleich hellen Abschnitten. */
-section:not([class]) + section:not([class]) {
+:where(section:not(.hero, .section-alt, .section-teal, .legal, .section--tight))
+  + :where(section:not(.hero, .section-alt, .section-teal, .legal, .section--tight)) {
   border-top: 1px solid var(--line-dark);
 }
 
